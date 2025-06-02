@@ -1,0 +1,81 @@
+spring:
+    main:
+        web-application-type: reactive
+    webflux:
+        base-path: /
+    r2dbc:
+        url: r2dbc:mysql://${HOST_DDBB}:${PORT_DDBB}/${SCHEMA_DDBB}?serverZoneId=UTC
+        username: ${USER_DDBB}
+        password: ${PASS_DDBB}
+        pool:
+            validation-depth: local
+            enabled: true
+            initial-size: 5
+            max-size: 20
+            max-idle-time: 30m
+            min-idle: 5
+
+    data:
+        redis:
+            host: ${HOST_DDBB}
+            port: 6379
+            timeout: 100
+            lettuce:
+                pool:
+                    max-active: 10
+                    max-idle: 10
+                    min-idle: 1
+    cache:
+        type: REDIS
+        redis:
+            time-to-live: 60000
+        
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: ${ISSUER_URI}
+                    jwk-set-uri: ${JWK_SET_URI} 
+    # webflux:
+    #     multipart:
+    #         max-in-memory-size: 8192KB
+    #         max-parts: 1
+    #         max-disk-usage-per-part: 8192KB
+    #     codec:
+    #         max-in-memory-size: 500KB
+
+    servlet:
+        multipart:
+            max-file-size: 10MB
+            enabled: true
+
+    output:
+        ansi:
+            enabled: ALWAYS
+        
+server:
+    port: ${PORT_SERVER}
+    ssl:
+        enabled: true
+        key-store-type: PKCS12
+        key-store: ${CERTS_PATH}/ks-contacts.p12
+        key-store-password: ${PASS_KS}
+        trust-store-type: PKCS12
+        trust-store: ${CERTS_PATH}/ts-contacts.p12
+        trust-store-password: ${PASS_TS}
+        protocol: TLS
+        enabled-protocols: 
+            - TLSv1.2
+        client-auth: need  # Exige que el cliente presente certificado (mTLS)
+
+logging:
+    level:
+        org:
+            springframework:
+                r2dbc: ERROR
+            security: DEBUG
+
+beneficiary:
+    time-to-live: 1
+
+  

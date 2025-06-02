@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springsecurity-keycloack-app-native-dao
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: springsecurity-keycloack-app-native-dao
+  template:
+    metadata:
+      labels:
+        app: springsecurity-keycloack-app-native-dao
+    spec:
+      containers:
+        - name: springsecurity-keycloack-container-dao
+          image: christopherchacon/webflux-nativo-redis-mtls-jwt-roles-dao:20052025-1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 10080
+          env:
+            - name: CERTS_PATH
+              value: /certs
+            - name: HOST_DDBB
+              value: 192.168.100.19
+            - name: PORT_DDBB
+              value: "3306"
+            - name: SCHEMA_DDBB
+              value: test
+            - name: USER_DDBB
+              value: microservice
+            - name: PASS_DDBB
+              value: t3st
+            - name: PORT_SERVER
+              value: "10080"
+            - name: ISSUER_URI
+              value: http://192.168.100.19:8080/realms/MicroserviceRealm
+            - name: JWK_SET_URI
+              value: http://192.168.100.19:8080/realms/MicroserviceRealm/protocol/openid-connect/certs
+            - name: PASS_KS
+              value: c0nt4cts
+            - name: PASS_TS
+              value: c0nt4cts
+          volumeMounts:
+            - name: certs-volume
+              mountPath: /certs
+              readOnly: true
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "2"
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+      volumes:
+        - name: certs-volume
+          hostPath:
+            path: /run/desktop/mnt/host/d/Softaware/Keystored
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springsecurity-keycloack-service-native-dao
+spec:
+  selector:
+    app: springsecurity-keycloack-app-native-dao
+  ports:
+    - protocol: TCP
+      port: 11300
+      targetPort: 10080
+  type: LoadBalancer

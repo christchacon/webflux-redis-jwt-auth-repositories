@@ -1,0 +1,65 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.5'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.graalvm.buildtools.native' version '0.10.6'
+}
+
+group = 'com.tutorial'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '21'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'io.asyncer:r2dbc-mysql:1.0.6'
+	runtimeOnly 'io.asyncer:r2dbc-mysql'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test'
+	// https://mvnrepository.com/artifact/io.r2dbc/r2dbc-pool
+	implementation 'io.r2dbc:r2dbc-pool:1.0.1.RELEASE'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-jose
+	implementation("org.springframework.security:spring-security-oauth2-jose:6.4.4")
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-reactor-netty
+	implementation 'org.springframework.boot:spring-boot-starter-reactor-netty:3.2.1'
+	//Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    implementation 'io.lettuce:lettuce-core'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+processResources {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from("src/main/resources/keystore") {
+        into("keystore")
+    }
+    from('src/main/resources/META-INF/native-image') {
+        into 'META-INF/native-image'
+    }
+}
+
+graalvmNative {
+    binaries {
+        named("main") {
+			//resources.autodetectc()
+            buildArgs.add("--no-fallback")
+			buildArgs.add("-H:IncludeResources=keystore/.*\\.p12")
+            imageName.set("webflux-app")
+
+        }
+    }
+}

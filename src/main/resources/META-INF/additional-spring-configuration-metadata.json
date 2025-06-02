@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "beneficiary.time-to-live",
+  "type": "java.lang.String",
+  "description": "A description for 'beneficiary.time-to-live'"
+}]}
