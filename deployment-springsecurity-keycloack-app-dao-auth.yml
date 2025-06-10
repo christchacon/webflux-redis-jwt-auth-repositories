@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: springsecurity-keycloack-app-native-dao-auth
+  name: webflux-keycloack-app-native-repos-auth
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: springsecurity-keycloack-app-native-dao-auth
+      app: webflux-keycloack-app-native-repos-auth
   template:
     metadata:
       labels:
-        app: springsecurity-keycloack-app-native-dao-auth
+        app: webflux-keycloack-app-native-repos-auth
     spec:
       containers:
-        - name: springsecurity-keycloack-app-native-dao-auth
-          image: christopherchacon/webflux-nativo-redis-mtls-jwt-roles-dao:29052025-1
+        - name: webflux-keycloack-app-native-repos-auth
+          image: christopherchacon/webflux-nativo-redis-mtls-jwt-roles-reps:02062025-1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 10080
@@ -61,12 +61,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: springsecurity-keycloack-app-native-dao-auth
+  name: webflux-keycloack-app-native-repos-auth
 spec:
   selector:
-    app: springsecurity-keycloack-app-native-dao-auth
+    app: webflux-keycloack-app-native-repos-auth
   ports:
     - protocol: TCP
-      port: 11400
+      port: 11500
       targetPort: 10080
   type: LoadBalancer

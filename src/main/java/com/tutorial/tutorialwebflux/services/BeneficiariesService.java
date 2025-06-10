@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.codec.multipart.FilePart;
@@ -20,21 +18,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.server.ServerRequest;
-
-import com.tutorial.tutorialwebflux.daos.BeneficiariesDao;
-import com.tutorial.tutorialwebflux.handlers.BeneficiariesHandlers;
 import com.tutorial.tutorialwebflux.models.BeneficiaryEntity;
 import com.tutorial.tutorialwebflux.models.BussinessFormatConfigEntity;
 import com.tutorial.tutorialwebflux.repositories.BeneficiariesRepository;
 import com.tutorial.tutorialwebflux.repositories.BusinessFormatRepository;
-
 import io.netty.util.internal.shaded.org.jctools.queues.MessagePassingQueue.Supplier;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.nio.file.Paths;
 import java.time.Duration;
-
-import org.springframework.util.FileSystemUtils;
 
 @Service
 @Component
@@ -48,8 +40,6 @@ public class BeneficiariesService {
     BusinessFormatRepository businessFormatRepository;
     @Autowired
     ReactiveRedisTemplate<String, Object> redisTemplate;
-    @Autowired
-    BeneficiariesDao beneficiariesDao;
 
     @Value("${beneficiary.time-to-live}")
     Long bttl;
@@ -78,7 +68,6 @@ public class BeneficiariesService {
                 //Esto se ejecuta solo si realmente hay un Mono vacio que es cuando falla la obtencion Redis o es vacio
                 Mono.defer(() -> { 
                     return bRepository.findById(id)
-                        //beneficiariesDao.getBeneficiaryById(id)
                             .doOnNext(beneficiary ->
                                                 logger.info("Beneficiary: {} found into data base",beneficiary.getId()))
                             .flatMap(beneficiary -> 
@@ -96,17 +85,6 @@ public class BeneficiariesService {
     }
 
     @Transactional
-    // public Flux<BeneficiaryEntity> saveBeneficiaries(List<BeneficiaryEntity> beneficiaries){
-    //     return bRepository.saveAll(beneficiaries).doOnNext(b -> {
-    //          logger.info("✔ Insertado: " + b.getRut() + " con ID: " + b.getId());
-    //     })
-    //     .onErrorContinue((throwable, obj) -> {
-    //         BeneficiaryEntity failed = (BeneficiaryEntity) obj;
-    //          logger.error("❌ Error al insertar: " + failed.getRut() + " → " + throwable.getMessage());
-    //     });
-    //     //return beneficiariesDao.saveAll(beneficiaries);
-    // }
-
         /**
      * Inserta una lista de BeneficiaryEntity usando ReactiveCrudRepository
      * - Muestra logs por cada entidad insertada correctamente (con su ID generado)
@@ -126,11 +104,6 @@ public class BeneficiariesService {
                logger.error("❌ Error al insertar: " + failed.getRut() + " → " + throwable.getMessage());
             });
     }
-
-    // @Transactional
-    // public Mono<Integer> saveBeneficiariesBatch(List<BeneficiaryEntity> beneficiaries){
-    //    return beneficiariesDao.batchInsert(beneficiaries);
-    // }
 
     @Transactional
     public Flux<BussinessFormatConfigEntity> getBFCE(Long id){
